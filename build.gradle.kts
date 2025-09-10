@@ -26,7 +26,7 @@ configurations {
 }
 
 application {
-    mainClass.set("hexlet.code.AppApplication.java")
+    mainClass.set("hexlet.code.AppApplication")
 }
 
 repositories {
