@@ -33,10 +33,10 @@ public class SecurityConfig {
     private CustomUserDetailsService userService;
 
     @Bean
+    @SuppressWarnings("java:S4502") // Disabling CSRF protection is safe for stateless JWT-based REST API
     public SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector)
             throws Exception {
         return http
-                // CSRF protection is disabled for REST API as it's stateless and uses JWT
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/").permitAll()
