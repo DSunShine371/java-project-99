@@ -1,9 +1,7 @@
 package hexlet.code.component;
 
 import hexlet.code.dto.UserCreateDTO;
-import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
-import hexlet.code.service.CustomUserDetailsService;
 import hexlet.code.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
