@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -52,6 +52,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     public void testCreateUser() throws Exception {
         UserCreateDTO userCreateDTO = new UserCreateDTO();
         userCreateDTO.setEmail("test@example.com");
@@ -63,7 +64,6 @@ public class UserControllerTest {
                         post("/api/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(om.writeValueAsString(userCreateDTO))
-                                .with(SecurityMockMvcRequestPostProcessors.jwt())
                 )
                 .andExpect(status().isCreated());
 
@@ -74,6 +74,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     public void testCreateUserWithInvalidData() throws Exception {
         UserCreateDTO userCreateDTO = new UserCreateDTO();
         userCreateDTO.setEmail("invalid-email");
@@ -83,12 +84,12 @@ public class UserControllerTest {
                         post("/api/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(om.writeValueAsString(userCreateDTO))
-                                .with(SecurityMockMvcRequestPostProcessors.jwt())
                 )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
+    @WithMockUser(username = "user1@example.com")
     public void testGetUsers() throws Exception {
         UserCreateDTO user1 = new UserCreateDTO();
         user1.setEmail("user1@example.com");
@@ -103,7 +104,6 @@ public class UserControllerTest {
         mockMvc.perform(
                         get("/api/users")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .with(SecurityMockMvcRequestPostProcessors.jwt())
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
@@ -111,6 +111,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "initial@example.com")
     public void testUpdateUser() throws Exception {
         UserCreateDTO userCreateDTO = new UserCreateDTO();
         userCreateDTO.setEmail("initial@example.com");
@@ -127,7 +128,6 @@ public class UserControllerTest {
                         put("/api/users/" + createdUser.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(om.writeValueAsString(userUpdateDTO))
-                                .with(SecurityMockMvcRequestPostProcessors.jwt())
                 )
                 .andExpect(status().isOk());
 
@@ -137,6 +137,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "delete@example.com")
     public void testDeleteUser() throws Exception {
         UserCreateDTO userCreateDTO = new UserCreateDTO();
         userCreateDTO.setEmail("delete@example.com");
@@ -147,10 +148,31 @@ public class UserControllerTest {
         mockMvc.perform(
                         delete("/api/users/" + userToDelete.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .with(SecurityMockMvcRequestPostProcessors.jwt())
                 )
                 .andExpect(status().isNoContent());
 
         assertThat(userRepository.findById(userToDelete.getId())).isEmpty();
+    }
+
+    @Test
+    @WithMockUser(username = "user1@example.com")
+    public void testUpdateOtherUserForbidden() throws Exception {
+        UserCreateDTO user1 = new UserCreateDTO();
+        user1.setEmail("user1@example.com");
+        user1.setPassword("password");
+        User user = userService.create(user1);
+
+        UserCreateDTO user2 = new UserCreateDTO();
+        user2.setEmail("user2@example.com");
+        user2.setPassword("password");
+        User otherUser = userService.create(user2);
+
+        UserUpdateDTO updateData = new UserUpdateDTO();
+        updateData.setFirstName(JsonNullable.of("NewName"));
+
+        mockMvc.perform(put("/api/users/" + otherUser.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(updateData)))
+                .andExpect(status().isForbidden());
     }
 }

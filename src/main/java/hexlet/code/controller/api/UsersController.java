@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -54,14 +56,22 @@ public class UsersController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    UserDTO update(@Valid @RequestBody UserUpdateDTO userData, @PathVariable Long id) {
+    UserDTO update(@Valid @RequestBody UserUpdateDTO userData, @PathVariable Long id, Principal principal) {
+        if (!principal.getName().equals(userService.findById(id).getEmail())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only edit your own profile");
+        }
+
         var user = userService.update(id, userData);
         return userMapper.map(user);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void delete(@PathVariable Long id) {
+    void delete(@PathVariable Long id, Principal principal) {
+        if (!principal.getName().equals(userService.findById(id).getEmail())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own profile");
+        }
+
         userService.delete(id);
     }
 }
