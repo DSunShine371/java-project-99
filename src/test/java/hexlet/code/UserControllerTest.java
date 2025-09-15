@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class UserControllerTest {
 
     @Autowired
@@ -46,7 +48,6 @@ public class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
-        // Очистка базы данных перед каждым тестом
         userRepository.deleteAll();
     }
 
@@ -66,18 +67,17 @@ public class UserControllerTest {
                 )
                 .andExpect(status().isCreated());
 
-        // Проверка, что пользователь был сохранен в базе данных
         User createdUser = userRepository.findByEmail("test@example.com").get();
         assertThat(createdUser).isNotNull();
         assertThat(createdUser.getFirstName()).isEqualTo("Test");
-        assertThat(createdUser.getPasswordDigest()).isNotEqualTo("password123"); // Проверка, что пароль зашифрован
+        assertThat(createdUser.getPasswordDigest()).isNotEqualTo("password123");
     }
 
     @Test
     public void testCreateUserWithInvalidData() throws Exception {
         UserCreateDTO userCreateDTO = new UserCreateDTO();
-        userCreateDTO.setEmail("invalid-email"); // Невалидный email
-        userCreateDTO.setPassword("12"); // Невалидный пароль (меньше 3 символов)
+        userCreateDTO.setEmail("invalid-email");
+        userCreateDTO.setPassword("12");
 
         mockMvc.perform(
                         post("/api/users")
@@ -85,7 +85,7 @@ public class UserControllerTest {
                                 .content(om.writeValueAsString(userCreateDTO))
                                 .with(SecurityMockMvcRequestPostProcessors.jwt())
                 )
-                .andExpect(status().isBadRequest()); // Ожидаем ошибку 400
+                .andExpect(status().isBadRequest());
     }
 
     @Test
