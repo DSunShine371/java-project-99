@@ -43,6 +43,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.openapitools:jackson-databind-nullable:0.2.7")
     implementation("org.mapstruct:mapstruct:1.6.3")
+    implementation("org.postgresql:postgresql:42.7.7")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 
     runtimeOnly("com.h2database:h2")
