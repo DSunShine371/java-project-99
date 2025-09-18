@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST).permitAll()
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/index.html").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/index.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/assets/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
