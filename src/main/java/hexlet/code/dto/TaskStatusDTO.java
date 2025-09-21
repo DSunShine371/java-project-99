@@ -5,10 +5,9 @@ import lombok.Data;
 import java.time.Instant;
 
 @Data
-public class UserDTO {
+public class TaskStatusDTO {
     private Long id;
-    private String email;
-    private String firstName;
-    private String lastName;
+    private String name;
+    private String slug;
     private Instant createdAt;
 }

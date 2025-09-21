@@ -3,7 +3,6 @@ package hexlet.code.controller.api;
 import hexlet.code.dto.UserCreateDTO;
 import hexlet.code.dto.UserDTO;
 import hexlet.code.dto.UserUpdateDTO;
-import hexlet.code.mapper.UserMapper;
 import hexlet.code.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,28 +29,22 @@ public class UsersController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private UserMapper userMapper;
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     UserDTO create(@Valid @RequestBody UserCreateDTO userData) {
-        var user = userService.create(userData);
-        return userMapper.map(user);
+        return userService.create(userData);
     }
 
     @GetMapping
     ResponseEntity<List<UserDTO>> index() {
         var users = userService.findAll();
-        var result = users.stream().map(userMapper::map).toList();
-        return ResponseEntity.ok().header("X-Total-Count", String.valueOf(users.size())).body(result);
+        return ResponseEntity.ok().header("X-Total-Count", String.valueOf(users.size())).body(users);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     UserDTO show(@PathVariable Long id) {
-        var user = userService.findById(id);
-        return userMapper.map(user);
+        return userService.findById(id);
     }
 
     @PutMapping("/{id}")
@@ -60,9 +53,7 @@ public class UsersController {
         if (!principal.getName().equals(userService.findById(id).getEmail())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only edit your own profile");
         }
-
-        var user = userService.update(id, userData);
-        return userMapper.map(user);
+        return userService.update(userData, id);
     }
 
     @DeleteMapping("/{id}")
@@ -71,7 +62,6 @@ public class UsersController {
         if (!principal.getName().equals(userService.findById(id).getEmail())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own profile");
         }
-
         userService.delete(id);
     }
 }
