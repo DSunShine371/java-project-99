@@ -45,7 +45,6 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.6.3")
     implementation("org.postgresql:postgresql:42.7.7")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.0")
 
     runtimeOnly("com.h2database:h2")
 
