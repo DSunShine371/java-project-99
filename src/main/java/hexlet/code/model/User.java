@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,8 +19,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
+
 @Entity
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
@@ -45,6 +48,9 @@ public class User implements UserDetails, BaseEntity {
     private String lastName;
 
     private String passwordDigest;
+
+    @OneToMany(mappedBy = "assignee")
+    private List<Task> tasks;
 
     @CreatedDate
     private Instant createdAt;

@@ -6,8 +6,10 @@ import hexlet.code.dto.UserUpdateDTO;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.UserMapper;
 import hexlet.code.model.User;
+import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Autowired
     private UserMapper userMapper;
@@ -57,6 +62,9 @@ public class UserService {
     }
 
     public void delete(Long id) {
+        if (taskRepository.findByAssigneeId(id).isPresent()) {
+            throw new DataIntegrityViolationException("User is assigned to a task and cannot be deleted.");
+        }
         userRepository.deleteById(id);
     }
 

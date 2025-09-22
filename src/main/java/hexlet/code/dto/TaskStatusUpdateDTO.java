@@ -11,7 +11,7 @@ public class TaskStatusUpdateDTO {
             String> name;
 
     private JsonNullable<
-            @Pattern(regexp = "^[a-z0-9-]+$",
+            @Pattern(regexp = "^[a-z0-9_]+$",
                     message = "Slug must consist of lowercase letters, numbers, and hyphens only.")
             @Size(min = 1, message = "Slug must contain at least 1 character.")
             String> slug;

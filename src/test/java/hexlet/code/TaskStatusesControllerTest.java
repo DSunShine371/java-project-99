@@ -88,7 +88,7 @@ public class TaskStatusesControllerTest {
     public void testCreateStatus() throws Exception {
         TaskStatusCreateDTO dto = new TaskStatusCreateDTO(
                 "New Status",
-                "new-status"
+                "new_status"
         );
 
         var request = post("/api/task_statuses")
@@ -99,14 +99,13 @@ public class TaskStatusesControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isCreated());
 
-        TaskStatus savedStatus = taskStatusRepository.findBySlug("new-status").get();
+        TaskStatus savedStatus = taskStatusRepository.findBySlug("new_status").get();
         assertThat(savedStatus).isNotNull();
         assertThat(savedStatus.getName()).isEqualTo("New Status");
     }
 
     @Test
     public void testCreateStatusWithInvalidData() throws Exception {
-        // Пустое имя и некорректный слаг
         TaskStatusCreateDTO dto = new TaskStatusCreateDTO("", "INVALID SLUG");
 
         var request = post("/api/task_statuses")
@@ -122,7 +121,7 @@ public class TaskStatusesControllerTest {
     public void testUpdateStatus() throws Exception {
         TaskStatusUpdateDTO dto = new TaskStatusUpdateDTO();
         dto.setName(JsonNullable.of("Updated Name"));
-        dto.setSlug(JsonNullable.of("updated-slug"));
+        dto.setSlug(JsonNullable.of("updated_slug"));
 
         var request = put("/api/task_statuses/" + testTaskStatus.getId())
                 .header("Authorization", "Bearer " + token)
@@ -134,7 +133,7 @@ public class TaskStatusesControllerTest {
 
         TaskStatus updatedStatus = taskStatusRepository.findById(testTaskStatus.getId()).get();
         assertThat(updatedStatus.getName()).isEqualTo("Updated Name");
-        assertThat(updatedStatus.getSlug()).isEqualTo("updated-slug");
+        assertThat(updatedStatus.getSlug()).isEqualTo("updated_slug");
     }
 
     @Test
