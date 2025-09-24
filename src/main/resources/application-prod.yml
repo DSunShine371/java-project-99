@@ -3,3 +3,18 @@ spring:
     url: ${JDBC_DATASOURCE_URL}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  devtools:
+    add-properties: false
+
+server:
+  port: ${PORT:8080}
+  address: 0.0.0.0
+
+logging:
+  level:
+    org:
+      springframework:
+        security: INFO
