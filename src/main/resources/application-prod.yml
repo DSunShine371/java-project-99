@@ -8,6 +8,8 @@ spring:
     show-sql: false
   devtools:
     add-properties: false
+  main:
+    web-application-type: servlet
 
 server:
   port: ${PORT:8080}

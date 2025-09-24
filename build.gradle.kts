@@ -68,10 +68,15 @@ tasks {
         dependsOn(test)
         reports { xml.required.set(true) }
     }
-}
 
-tasks.test {
-    useJUnitPlatform()
+    bootJar {
+        enabled = true
+        archiveFileName = "AppApplication.jar"
+    }
+
+    jar {
+        enabled = false
+    }
 }
 
 sonar {
