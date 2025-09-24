@@ -7,16 +7,23 @@ spring:
       ddl-auto: validate
     show-sql: false
   devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
     add-properties: false
   main:
     web-application-type: servlet
 
 server:
+  error:
+    include-stacktrace: never
   port: ${PORT:8080}
   address: 0.0.0.0
 
 logging:
   level:
+    ROOT: INFO
     org:
       springframework:
         security: INFO

@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: taskManager
   profiles:
     active: dev
   jpa:
@@ -10,13 +12,22 @@ spring:
       dateformat: "yyyy-MM-dd HH:mm:ss"
   devtools:
     add-properties: false
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+
 rsa:
   private-key: classpath:certs/private.pem
   public-key: classpath:certs/public.pem
+
 logging:
   level:
     org:
       springframework:
         security: DEBUG
+
 server:
-  port: 8080
+  port: ${PORT:5001}
+
+base-url: /api
