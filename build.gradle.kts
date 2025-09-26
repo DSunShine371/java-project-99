@@ -21,7 +21,7 @@ java {
 configurations {
     developmentOnly
     runtimeClasspath {
-        extendsFrom(developmentOnly.get())
+        extendsFrom(configurations["developmentOnly"])
     }
 }
 

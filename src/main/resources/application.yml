@@ -28,6 +28,6 @@ logging:
         security: DEBUG
 
 server:
-  port: ${PORT:5001}
+  port: ${PORT:8080}
 
 base-url: /api
