@@ -23,5 +23,7 @@ WORKDIR /app
 # Копируем ТОЛЬКО готовый исполняемый JAR
 COPY --from=builder /app/build/libs/*.jar app.jar
 
+EXPOSE 10000
+
 # Запуск приложения без Gradle!
 CMD ["java", "-jar", "app.jar"]

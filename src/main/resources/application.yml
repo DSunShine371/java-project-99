@@ -10,8 +10,6 @@ spring:
   logging:
     pattern:
       dateformat: "yyyy-MM-dd HH:mm:ss"
-  devtools:
-    add-properties: false
   mvc:
     hiddenmethod:
       filter:

@@ -2,17 +2,18 @@ spring:
   datasource:
     url: ${JDBC_DATASOURCE_URL}
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate
-    show-sql: false
-  main:
-    web-application-type: servlet
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    sql:
+      init:
+        mode: always
 
 server:
-  error:
-    include-stacktrace: never
-  port: ${PORT:8080}
+  port: ${PORT:10000}
   address: 0.0.0.0
 
 logging:
