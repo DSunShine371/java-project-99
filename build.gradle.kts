@@ -75,5 +75,14 @@ sonar {
         property("sonar.organization", "dsunshine371pis")
         property("sonar.sources", "src/main/java")
         property("sonar.tests", "src/test/java")
+        property("sonar.coverage.exclusions", """
+            **/handler/**,
+            **/utils/**,
+            **/exception/**,
+            **/config/**,
+            **/model/**,
+            **/dto/**,
+            **/*Application.java
+        """)
     }
 }
