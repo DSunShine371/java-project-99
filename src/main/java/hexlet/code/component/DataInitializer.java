@@ -1,7 +1,9 @@
 package hexlet.code.component;
 
+import hexlet.code.dto.LabelCreateDTO;
 import hexlet.code.dto.TaskStatusCreateDTO;
 import hexlet.code.model.User;
+import hexlet.code.service.LabelService;
 import hexlet.code.service.SecurityUserDetailsService;
 import hexlet.code.service.TaskStatusService;
 import lombok.AllArgsConstructor;
@@ -20,10 +22,14 @@ public class DataInitializer implements ApplicationRunner {
     @Autowired
     private final TaskStatusService taskStatusService;
 
+    @Autowired
+    private final LabelService labelService;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         initializeAdminUser();
         initializeDefaultStatuses();
+        initializeDefaultLabels();
     }
 
     private void initializeAdminUser() {
@@ -49,6 +55,17 @@ public class DataInitializer implements ApplicationRunner {
     private void initializeStatus(String name, String slug) {
         if (!taskStatusService.taskStatusExists(slug)) {
             taskStatusService.create(new TaskStatusCreateDTO(name, slug));
+        }
+    }
+
+    private void initializeDefaultLabels() {
+        initializeLabels("feature");
+        initializeLabels("bug");
+    }
+
+    private void initializeLabels(String name) {
+        if (!labelService.labelExists(name)) {
+            labelService.create(new LabelCreateDTO(name));
         }
     }
 }

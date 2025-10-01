@@ -3,10 +3,6 @@ spring:
     name: taskManager
   profiles:
     active: dev
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
   logging:
     pattern:
       dateformat: "yyyy-MM-dd HH:mm:ss"

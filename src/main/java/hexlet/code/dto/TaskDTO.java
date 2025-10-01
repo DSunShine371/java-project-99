@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.Set;
 
 @Data
 public class TaskDTO {
@@ -21,4 +22,6 @@ public class TaskDTO {
     private String description;
 
     private String status;
+
+    private Set<Long> taskLabelIds;
 }

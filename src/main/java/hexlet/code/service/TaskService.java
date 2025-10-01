@@ -2,19 +2,24 @@ package hexlet.code.service;
 
 import hexlet.code.dto.TaskCreateDTO;
 import hexlet.code.dto.TaskDTO;
+import hexlet.code.dto.TaskFilterDTO;
 import hexlet.code.dto.TaskUpdateDTO;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskMapper;
+import hexlet.code.model.Label;
 import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class TaskService {
@@ -29,6 +34,9 @@ public class TaskService {
     private TaskStatusRepository taskStatusRepository;
 
     @Autowired
+    private LabelRepository labelRepository;
+
+    @Autowired
     private TaskMapper taskMapper;
 
     public List<TaskDTO> findAll() {
@@ -37,9 +45,24 @@ public class TaskService {
                 .toList();
     }
 
+    public List<TaskDTO> findByFilters(TaskFilterDTO filters) {
+        List<Task> tasks;
+
+        tasks = taskRepository.findByFilters(
+                filters.getTitleCont(),
+                filters.getAssigneeId(),
+                filters.getStatus(),
+                filters.getLabelId()
+        );
+
+        return tasks.stream()
+                .map(taskMapper::map)
+                .toList();
+
+    }
+
     public TaskDTO findById(Long id) {
-        Task task = findTaskById(id);
-        return taskMapper.map(task);
+        return taskMapper.map(findTaskById(id));
     }
 
     public TaskDTO create(TaskCreateDTO taskData) {
@@ -57,8 +80,19 @@ public class TaskService {
             task.setAssignee(assignee);
         }
 
-        taskRepository.save(task);
-        return taskMapper.map(task);
+        if (taskData.getTaskLabelIds() != null && !taskData.getTaskLabelIds().isEmpty()) {
+            Set<Label> labels = new HashSet<>();
+            for (Long labelId : taskData.getTaskLabelIds()) {
+                Label label = labelRepository.findById(labelId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Label with id " + labelId + " not found"));
+                labels.add(label);
+            }
+            task.setLabels(labels);
+        }
+
+        Task savedTask = taskRepository.save(task);
+
+        return taskMapper.map(taskRepository.findById(savedTask.getId()).get());
     }
 
     public TaskDTO update(TaskUpdateDTO taskData, Long id) {
@@ -74,7 +108,6 @@ public class TaskService {
 
         if (taskData.getAssigneeId() != null && taskData.getAssigneeId().isPresent()) {
             Long assigneeId = taskData.getAssigneeId().get();
-
             if (assigneeId == null) {
                 task.setAssignee(null);
             } else {
@@ -85,8 +118,23 @@ public class TaskService {
             }
         }
 
-        taskRepository.save(task);
-        return taskMapper.map(task);
+        if (taskData.getTaskLabelIds() != null) {
+            Set<Label> labels = new HashSet<>();
+
+            if (taskData.getTaskLabelIds().isPresent()) {
+                Set<Long> labelIds = taskData.getTaskLabelIds().get();
+                for (Long labelId : labelIds) {
+                    Label label = labelRepository.findById(labelId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Label with id "
+                                    + labelId + " not found"));
+                    labels.add(label);
+                }
+            }
+            task.setLabels(labels);
+        }
+
+        Task updatedTask = taskRepository.save(task);
+        return taskMapper.map(taskRepository.findById(updatedTask.getId()).get());
     }
 
     public void delete(Long id) {

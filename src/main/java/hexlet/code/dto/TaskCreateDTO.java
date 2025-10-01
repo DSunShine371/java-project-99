@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 public class TaskCreateDTO {
 
@@ -24,4 +27,6 @@ public class TaskCreateDTO {
 
     @NotBlank(message = "Status cannot be empty.")
     private String status;
+
+    private Set<Long> taskLabelIds = new HashSet<>();
 }

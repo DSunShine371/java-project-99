@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.openapitools.jackson.nullable.JsonNullable;
 
+import java.util.Set;
+
 @Data
 public class TaskUpdateDTO {
 
@@ -24,4 +26,6 @@ public class TaskUpdateDTO {
     private JsonNullable<String> description;
 
     private JsonNullable<String> status;
+
+    private JsonNullable<Set<Long>> taskLabelIds;
 }
