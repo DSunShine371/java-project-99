@@ -55,7 +55,10 @@ public class DataInitializer implements ApplicationRunner {
 
     private void initializeStatus(String name, String slug) {
         if (!taskStatusService.taskStatusExists(slug)) {
-            taskStatusService.create(new TaskStatusCreateDTO(name, slug));
+            var taskStatusCreateDTO = new TaskStatusCreateDTO();
+            taskStatusCreateDTO.setName(name);
+            taskStatusCreateDTO.setSlug(slug);
+            taskStatusService.create(taskStatusCreateDTO);
         }
     }
 

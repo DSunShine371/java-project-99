@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.config.JWTUtils;
 import hexlet.code.dto.LabelCreateDTO;
 import hexlet.code.dto.LabelUpdateDTO;
-import hexlet.code.dto.TaskCreateDTO;
 import hexlet.code.model.Label;
+import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
 import hexlet.code.repository.LabelRepository;
@@ -60,7 +60,6 @@ public class LabelsControllerTest {
 
     @BeforeEach
     public void setUp() {
-        labelRepository.deleteAll();
         User testUser = new User();
         testUser.setEmail("test@example.com");
         testUser.setPasswordDigest("password");
@@ -82,7 +81,7 @@ public class LabelsControllerTest {
 
     @Test
     public void testCreateLabel() throws Exception {
-        LabelCreateDTO dto = new LabelCreateDTO("bug");
+        LabelCreateDTO dto = new LabelCreateDTO("fix");
 
         var request = post("/api/labels")
                 .header("Authorization", "Bearer " + token)
@@ -92,12 +91,12 @@ public class LabelsControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isCreated());
 
-        assertThat(labelRepository.findByName("bug")).isPresent();
+        assertThat(labelRepository.findByName("fix")).isPresent();
     }
 
     @Test
     public void testCreateLabelWithInvalidData() throws Exception {
-        LabelCreateDTO dto = new LabelCreateDTO("a"); // Имя слишком короткое
+        LabelCreateDTO dto = new LabelCreateDTO("a");
 
         var request = post("/api/labels")
                 .header("Authorization", "Bearer " + token)
@@ -150,15 +149,15 @@ public class LabelsControllerTest {
     @Test
     public void testDeleteLabelFailsIfAssociatedWithTask() throws Exception {
         TaskStatus status = new TaskStatus();
-        status.setName("Draft");
-        status.setSlug("draft");
+        status.setName("For test");
+        status.setSlug("for_test");
         taskStatusRepository.save(status);
 
-        TaskCreateDTO taskDto = new TaskCreateDTO();
-        taskDto.setName("Test Task");
-        taskDto.setStatus("draft");
-        taskDto.setTaskLabelIds(Set.of(testLabel.getId()));
-        taskService.create(taskDto);
+        Task task = new Task();
+        task.setName("Test Task");
+        task.setTaskStatus(status);
+        task.setLabels(Set.of(testLabel));
+        taskRepository.save(task);
 
         mockMvc.perform(delete("/api/labels/"
                         + testLabel.getId()).header("Authorization", "Bearer " + token))

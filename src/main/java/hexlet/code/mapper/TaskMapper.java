@@ -40,10 +40,8 @@ public abstract class TaskMapper {
         if (labels == null) {
             return new HashSet<>();
         }
-        Set<Long> labelNames = labels.stream()
+        return labels.stream()
                 .map(Label::getId)
                 .collect(Collectors.toSet());
-
-        return labelNames;
     }
 }

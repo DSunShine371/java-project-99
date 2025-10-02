@@ -87,10 +87,9 @@ public class TaskStatusesControllerTest {
 
     @Test
     public void testCreateStatus() throws Exception {
-        TaskStatusCreateDTO dto = new TaskStatusCreateDTO(
-                "New Status",
-                "new_status"
-        );
+        TaskStatusCreateDTO dto = new TaskStatusCreateDTO();
+        dto.setName("New Status");
+        dto.setSlug("new_status");
 
         var request = post("/api/task_statuses")
                 .header("Authorization", "Bearer " + token)
@@ -107,7 +106,9 @@ public class TaskStatusesControllerTest {
 
     @Test
     public void testCreateStatusWithInvalidData() throws Exception {
-        TaskStatusCreateDTO dto = new TaskStatusCreateDTO("", "INVALID SLUG");
+        TaskStatusCreateDTO dto = new TaskStatusCreateDTO();
+        dto.setName("");
+        dto.setSlug("INVALID SLUG");
 
         var request = post("/api/task_statuses")
                 .header("Authorization", "Bearer " + token)
@@ -168,7 +169,9 @@ public class TaskStatusesControllerTest {
         mockMvc.perform(get("/api/task_statuses"))
                 .andExpect(status().isUnauthorized());
 
-        TaskStatusCreateDTO dto = new TaskStatusCreateDTO("Some Status", "some-status");
+        TaskStatusCreateDTO dto = new TaskStatusCreateDTO();
+        dto.setName("Some Status");
+        dto.setSlug("some_status");
         mockMvc.perform(post("/api/task_statuses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(dto)))
