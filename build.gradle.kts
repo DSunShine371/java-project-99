@@ -7,6 +7,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("io.freefair.lombok") version "8.13"
     id("org.sonarqube") version "6.2.0.5505"
+    id("io.sentry.jvm.gradle") version "5.12.0"
 }
 
 group = "hexlet.code"
@@ -87,4 +88,11 @@ sonar {
             **/AppApplication.java
         """)
     }
+}
+sentry {
+    includeSourceContext = true
+
+    org = "sunshine-nc"
+    projectName = "java-spring-boot"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }

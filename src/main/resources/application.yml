@@ -25,3 +25,7 @@ server:
   port: ${PORT:8080}
 
 base-url: /api
+
+sentry:
+  dsn: https://40d69711f4ccf02d81e94c5f4b0af013@o4510120886140928.ingest.us.sentry.io/4510120990146560
+  send-default-pii: true
