@@ -78,7 +78,7 @@ public class UserService {
     }
 
     public boolean isAdmin(String email)  {
-        return findByEmail(email).isAdmin();
+        return findByEmail(email).getIsAdmin();
     }
     private User findByEmail(String email) {
         return userRepository.findByEmail(email)

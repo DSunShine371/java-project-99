@@ -81,7 +81,7 @@ public class UsersControllerTest {
         admin.setEmail("admin@example.com");
         admin.setFirstName("Admin");
         admin.setPasswordDigest(passwordEncoder.encode("admin12345"));
-        admin.setAdmin(true);
+        admin.setIsAdmin(true);
         userRepository.save(admin);
         adminToken = jwtUtils.generateToken(admin.getEmail());
 

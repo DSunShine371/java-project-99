@@ -53,7 +53,7 @@ public class User implements UserDetails, BaseEntity {
     private List<Task> tasks;
 
     @Column(name = "is_admin")
-    private boolean isAdmin = false;
+    private Boolean isAdmin = false;
 
     @CreatedDate
     private Instant createdAt;
