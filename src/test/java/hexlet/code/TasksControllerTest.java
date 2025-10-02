@@ -109,12 +109,10 @@ public class TasksControllerTest {
         dto.setAssigneeId(testUser.getId());
         dto.setTaskLabelIds(Set.of(testLabel1.getId(), testLabel2.getId()));
 
-        var request = post("/api/tasks")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(dto));
-
-        mockMvc.perform(request)
+        mockMvc.perform(post("/api/tasks")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
 
         assertThat(taskRepository.count()).isEqualTo(1);
@@ -123,6 +121,19 @@ public class TasksControllerTest {
         assertThat(task.getAssignee().getId()).isEqualTo(testUser.getId());
         assertThat(task.getTaskStatus().getSlug()).isEqualTo(testTaskStatus.getSlug());
         assertThat(task.getLabels()).hasSize(2);
+    }
+
+    @Test
+    public void testGetTaskById() throws Exception {
+        var task = new hexlet.code.model.Task();
+        task.setName("Show Title");
+        task.setTaskStatus(testTaskStatus);
+        task.setAssignee(testUser);
+        taskRepository.save(task);
+
+        mockMvc.perform(get("/api/tasks/"
+                        + task.getId()).header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -138,13 +149,10 @@ public class TasksControllerTest {
         dto.setDescription(JsonNullable.of("Updated description"));
         dto.setTaskLabelIds(JsonNullable.of(Set.of(testLabel2.getId())));
 
-
-        var request = put("/api/tasks/" + task.getId())
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(dto));
-
-        mockMvc.perform(request)
+        mockMvc.perform(put("/api/tasks/" + task.getId())
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(dto)))
                 .andExpect(status().isOk());
 
         var updatedTask = taskRepository.findById(task.getId()).get();

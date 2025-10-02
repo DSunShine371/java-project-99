@@ -72,4 +72,16 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
     }
+
+    public UserDTO findUserByEmail(String email) {
+        return userMapper.map(findByEmail(email));
+    }
+
+    public boolean isAdmin(String email)  {
+        return findByEmail(email).isAdmin();
+    }
+    private User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"));
+    }
 }

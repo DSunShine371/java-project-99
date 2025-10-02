@@ -6,8 +6,6 @@ import hexlet.code.dto.TaskFilterDTO;
 import hexlet.code.dto.TaskUpdateDTO;
 import hexlet.code.service.TaskService;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +25,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tasks")
 public class TasksController {
-
-    private static final Logger LOG = LoggerFactory.getLogger(TasksController.class);
-
     @Autowired
     private TaskService taskService;
 
@@ -55,19 +50,13 @@ public class TasksController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public TaskDTO show(@PathVariable Long id) {
-        TaskDTO result = taskService.findById(id);
-        LOG.info("Task {} labels: {}", id, result.getTaskLabelIds());
-        return result;
+        return taskService.findById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TaskDTO create(@Valid @RequestBody TaskCreateDTO taskData) {
-        LOG.info("Creating task with data: {}", taskData);
-        TaskDTO result = taskService.create(taskData);
-        LOG.info("Created task result: {}", result);
-        LOG.info("Labels in result: {}", result.getTaskLabelIds());
-        return result;
+        return taskService.create(taskData);
     }
 
     @PutMapping("/{id}")

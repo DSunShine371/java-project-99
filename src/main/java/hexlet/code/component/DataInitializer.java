@@ -40,6 +40,7 @@ public class DataInitializer implements ApplicationRunner {
             userData.setFirstName("Admin");
             userData.setLastName("Adminskiy");
             userData.setPasswordDigest("qwerty");
+            userData.setAdmin(true);
             userService.createUser(userData);
         }
     }

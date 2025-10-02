@@ -133,22 +133,22 @@ public class LabelsControllerTest {
 
     @Test
     public void testGetLabelById() throws Exception {
-        mockMvc.perform(get("/api/labels/" + testLabel.getId()).header("Authorization", "Bearer " + token))
+        mockMvc.perform(get("/api/labels/"
+                        + testLabel.getId()).header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void testDeleteLabel() throws Exception {
-        mockMvc.perform(delete("/api/labels/" + testLabel.getId()).header("Authorization", "Bearer " + token))
+        mockMvc.perform(delete("/api/labels/"
+                        + testLabel.getId()).header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
 
         assertThat(labelRepository.existsById(testLabel.getId())).isFalse();
     }
 
-    // ⭐ Новый важный тест
     @Test
     public void testDeleteLabelFailsIfAssociatedWithTask() throws Exception {
-        // Создаем задачу и связываем ее с нашей тестовой меткой
         TaskStatus status = new TaskStatus();
         status.setName("Draft");
         status.setSlug("draft");
@@ -160,11 +160,10 @@ public class LabelsControllerTest {
         taskDto.setTaskLabelIds(Set.of(testLabel.getId()));
         taskService.create(taskDto);
 
-        // Пытаемся удалить метку
-        mockMvc.perform(delete("/api/labels/" + testLabel.getId()).header("Authorization", "Bearer " + token))
-                .andExpect(status().isBadRequest()); // Ожидаем ошибку (например, 400)
+        mockMvc.perform(delete("/api/labels/"
+                        + testLabel.getId()).header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
 
-        // Убеждаемся, что метка не была удалена
         assertThat(labelRepository.existsById(testLabel.getId())).isTrue();
     }
 

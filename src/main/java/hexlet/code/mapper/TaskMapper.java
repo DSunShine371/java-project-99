@@ -12,8 +12,6 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,8 +24,6 @@ import java.util.stream.Collectors;
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public abstract class TaskMapper {
-    private static final Logger LOG = LoggerFactory.getLogger(TaskMapper.class);
-
     @Mapping(source = "assignee.id", target = "assigneeId")
     @Mapping(source = "taskStatus.slug", target = "status")
     @Mapping(source = "labels", target = "taskLabelIds", qualifiedByName = "labelsToIds")
@@ -41,16 +37,13 @@ public abstract class TaskMapper {
 
     @Named("labelsToIds")
     protected Set<Long> labelsToIds(Set<Label> labels) {
-        LOG.info("Mapping labels to ids. Input labels: {}", labels);
         if (labels == null) {
-            LOG.info("No labels to map");
             return new HashSet<>();
         }
         Set<Long> labelNames = labels.stream()
                 .map(Label::getId)
                 .collect(Collectors.toSet());
 
-        LOG.info("Mapped label ids: {}", labelNames);
         return labelNames;
     }
 }

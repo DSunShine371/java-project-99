@@ -82,7 +82,9 @@ sonar {
             **/config/**,
             **/model/**,
             **/dto/**,
-            **/*Application.java
+            **/JsonNullableMapper.java
+            **/SecurityUserDetailsService.java
+            **/Application.java
         """)
     }
 }

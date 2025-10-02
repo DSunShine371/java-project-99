@@ -50,7 +50,10 @@ public class UsersController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     UserDTO update(@Valid @RequestBody UserUpdateDTO userData, @PathVariable Long id, Principal principal) {
-        if (!principal.getName().equals(userService.findById(id).getEmail())) {
+        var currentUser = userService.findUserByEmail(principal.getName());
+        var targetUser = userService.findById(id);
+        boolean isAdmin = userService.isAdmin(principal.getName());
+        if (!currentUser.getId().equals(targetUser.getId()) && !isAdmin) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only edit your own profile");
         }
         return userService.update(userData, id);
@@ -59,7 +62,10 @@ public class UsersController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void delete(@PathVariable Long id, Principal principal) {
-        if (!principal.getName().equals(userService.findById(id).getEmail())) {
+        var currentUser = userService.findUserByEmail(principal.getName());
+        var targetUser = userService.findById(id);
+        boolean isAdmin = userService.isAdmin(principal.getName());
+        if (!currentUser.getId().equals(targetUser.getId()) && !isAdmin) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own profile");
         }
         userService.delete(id);

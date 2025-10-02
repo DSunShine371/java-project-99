@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.config.JWTUtils;
 import hexlet.code.dto.TaskStatusCreateDTO;
 import hexlet.code.dto.TaskStatusUpdateDTO;
+import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -33,30 +35,28 @@ public class TaskStatusesControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper om;
-
     @Autowired
     private TaskStatusRepository taskStatusRepository;
-
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private TaskRepository taskRepository;
     @Autowired
     private JWTUtils jwtUtils;
 
     private String token;
-
     private TaskStatus testTaskStatus;
+    private User testUser;
 
     @BeforeEach
     public void setUp() {
-        User testUser = new User();
-        testUser.setEmail("test-user@example.com");
-        testUser.setPasswordDigest("password123");
-        userRepository.save(testUser);
-        token = jwtUtils.generateToken(testUser.getEmail());
+        User user = new User();
+        user.setEmail("test-user@example.com");
+        user.setPasswordDigest("password123");
+        testUser = userRepository.save(user);
+        token = jwtUtils.generateToken(user.getEmail());
 
         testTaskStatus = new TaskStatus();
         testTaskStatus.setName("In Progress");
@@ -66,6 +66,7 @@ public class TaskStatusesControllerTest {
 
     @AfterEach
     public void cleanUp() {
+        taskRepository.deleteAll();
         taskStatusRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -145,6 +146,21 @@ public class TaskStatusesControllerTest {
                 .andExpect(status().isNoContent());
 
         assertThat(taskStatusRepository.findById(testTaskStatus.getId())).isEmpty();
+    }
+
+    @Test
+    public void testDeleteStatusFailsIfAssociatedWithTask() throws Exception {
+        Task task = new Task();
+        task.setAssignee(testUser);
+        task.setName("Test Task");
+        task.setTaskStatus(testTaskStatus);
+        taskRepository.save(task);
+
+        mockMvc.perform(delete("/api/task_statuses/"
+                        + testTaskStatus.getId()).header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
+
+        assertThat(taskStatusRepository.existsById(testTaskStatus.getId())).isTrue();
     }
 
     @Test

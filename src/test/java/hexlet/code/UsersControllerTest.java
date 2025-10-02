@@ -9,6 +9,7 @@ import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.service.UserService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -34,25 +34,48 @@ public class UsersControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private UserService userService;
-
     @Autowired
     private UserMapper userMapper;
-
     @Autowired
     private ObjectMapper om;
-
     @Autowired
     private JWTUtils jwtUtils;
-
-
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    private String token;
+    private String adminToken;
+    private User testUser;
+    private User user2;
+    private User admin;
+
+    @BeforeEach
+    public void setUp() {
+        testUser = new User();
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
+        testUser.setEmail("test@example.com");
+        testUser.setPasswordDigest(passwordEncoder.encode("password1234"));
+        userRepository.save(testUser);
+        token = jwtUtils.generateToken(testUser.getEmail());
+
+        user2 = new User();
+        user2.setEmail("user2@example.com");
+        user2.setPasswordDigest(passwordEncoder.encode("password"));
+        userRepository.save(user2);
+
+        admin = new User();
+        admin.setEmail("admin@example.com");
+        admin.setFirstName("Admin");
+        admin.setPasswordDigest(passwordEncoder.encode("admin12345"));
+        admin.setAdmin(true);
+        userRepository.save(admin);
+        adminToken = jwtUtils.generateToken(admin.getEmail());
+    }
 
     @AfterEach
     public void cleanUp() {
@@ -60,120 +83,115 @@ public class UsersControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@example.com")
     public void testCreateUser() throws Exception {
         UserCreateDTO dto = new UserCreateDTO();
-        dto.setEmail("test@example.com");
-        dto.setFirstName("Test");
+        dto.setEmail("new-test@example.com");
+        dto.setFirstName("New");
         dto.setLastName("User");
-        dto.setPassword("password123");
+        dto.setPassword("newPassword");
 
-        mockMvc.perform(
-                        post("/api/users")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(dto))
-                )
+        mockMvc.perform(post("/api/users").header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
 
-        User createdUser = userRepository.findByEmail("test@example.com").get();
+        User createdUser = userRepository.findByEmail("new-test@example.com").get();
         assertThat(createdUser).isNotNull();
-        assertThat(createdUser.getFirstName()).isEqualTo("Test");
-        assertThat(passwordEncoder.matches("password123", createdUser.getPasswordDigest())).isTrue();
+        assertThat(createdUser.getFirstName()).isEqualTo("New");
+        assertThat(passwordEncoder.matches("newPassword", createdUser.getPasswordDigest())).isTrue();
     }
 
     @Test
-    @WithMockUser(username = "test@example.com")
     public void testCreateUserWithInvalidData() throws Exception {
         UserCreateDTO dto = new UserCreateDTO();
         dto.setEmail("invalid-email");
         dto.setPassword("12");
 
-        mockMvc.perform(
-                        post("/api/users")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(dto))
-                )
+        mockMvc.perform(post("/api/users").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void testGetAllUsers() throws Exception {
-        User testUser = new User();
-        testUser.setEmail("user1@example.com");
-        testUser.setPasswordDigest(passwordEncoder.encode("password"));
-        userRepository.save(testUser);
-
-        String token = jwtUtils.generateToken(testUser.getEmail());
-
         mockMvc.perform(get("/api/users")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
 
     @Test
+    public void testGetUserById() throws Exception {
+        mockMvc.perform(get("/api/users/" + testUser.getId())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     public void testUpdateUser() throws Exception {
-        User userToUpdate = new User();
-        userToUpdate.setEmail("update-me@example.com");
-        userToUpdate.setPasswordDigest(passwordEncoder.encode("initialPassword"));
-        userRepository.save(userToUpdate);
-
-        String token = jwtUtils.generateToken(userToUpdate.getEmail());
-
         UserUpdateDTO dto = new UserUpdateDTO();
         dto.setFirstName(JsonNullable.of("Updated"));
-        dto.setLastName(JsonNullable.of("User"));
+        dto.setLastName(JsonNullable.of("NewUser"));
 
-        mockMvc.perform(
-                        put("/api/users/" + userToUpdate.getId())
-                                .header("Authorization", "Bearer " + token)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(dto))
-                )
+        mockMvc.perform(put("/api/users/" + testUser.getId())
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(dto)))
                 .andExpect(status().isOk());
 
-        User updatedUser = userRepository.findById(userToUpdate.getId()).get();
+        User updatedUser = userRepository.findById(testUser.getId()).get();
         assertThat(updatedUser.getFirstName()).isEqualTo("Updated");
-        assertThat(updatedUser.getLastName()).isEqualTo("User");
+        assertThat(updatedUser.getLastName()).isEqualTo("NewUser");
     }
 
     @Test
     public void testDeleteUser() throws Exception {
-        User userToDelete = new User();
-        userToDelete.setEmail("delete-me@example.com");
-        userToDelete.setPasswordDigest(passwordEncoder.encode("password"));
-        userRepository.save(userToDelete);
-
-        String token = jwtUtils.generateToken(userToDelete.getEmail());
-
-        mockMvc.perform(delete("/api/users/" + userToDelete.getId())
+        mockMvc.perform(delete("/api/users/" + testUser.getId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
 
-        assertThat(userRepository.findById(userToDelete.getId())).isEmpty();
+        assertThat(userRepository.findById(testUser.getId())).isEmpty();
     }
 
     @Test
     public void testUpdateOtherUserForbidden() throws Exception {
-        User user1 = new User();
-        user1.setEmail("user1@example.com");
-        user1.setPasswordDigest(passwordEncoder.encode("password"));
-        userRepository.save(user1);
-
-        User user2 = new User();
-        user2.setEmail("user2@example.com");
-        user2.setPasswordDigest(passwordEncoder.encode("password"));
-        userRepository.save(user2);
-
-        String tokenForUser1 = jwtUtils.generateToken(user1.getEmail());
-
         UserUpdateDTO dto = new UserUpdateDTO();
         dto.setFirstName(JsonNullable.of("NewName"));
 
         mockMvc.perform(put("/api/users/" + user2.getId())
-                        .header("Authorization", "Bearer " + tokenForUser1) // <-- Важный момент
+                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(dto)))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void testDeleteOtherUserForbidden() throws Exception {
+        mockMvc.perform(delete("/api/users/" + user2.getId())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void testUpdateOtherUserAsAdmin() throws Exception {
+        UserUpdateDTO dto = new UserUpdateDTO();
+        dto.setFirstName(JsonNullable.of("UpdatedByAdmin"));
+
+        mockMvc.perform(put("/api/users/" + testUser.getId())
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(dto)))
+                .andExpect(status().isOk());
+
+        User updatedUser = userRepository.findById(testUser.getId()).get();
+        assertThat(updatedUser.getFirstName()).isEqualTo("UpdatedByAdmin");
+    }
+
+    @Test
+    public void testDeleteOtherUserAsAdmin() throws Exception {
+        mockMvc.perform(delete("/api/users/" + user2.getId())
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isNoContent());
     }
 
     @Test

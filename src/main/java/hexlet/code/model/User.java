@@ -52,6 +52,8 @@ public class User implements UserDetails, BaseEntity {
     @OneToMany(mappedBy = "assignee")
     private List<Task> tasks;
 
+    private boolean isAdmin = false;
+
     @CreatedDate
     private Instant createdAt;
 
