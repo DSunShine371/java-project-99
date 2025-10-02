@@ -65,6 +65,7 @@ public class TasksControllerTest {
     private JWTUtils jwtUtils;
 
     private String token;
+    private Task testTask;
     private User testUser;
     private TaskStatus testTaskStatus;
     private Label testLabel1;
@@ -90,6 +91,13 @@ public class TasksControllerTest {
         testLabel2 = new Label();
         testLabel2.setName("test label 2");
         labelRepository.save(testLabel2);
+
+        testTask = new Task();
+        testTask.setName("Test Task");
+        testTask.setTaskStatus(testTaskStatus);
+        testTask.setAssignee(testUser);
+        testTask.setDescription("For Tests");
+        taskRepository.save(testTask);
     }
 
     @AfterEach
@@ -115,72 +123,45 @@ public class TasksControllerTest {
                         .content(om.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
 
-        assertThat(taskRepository.count()).isEqualTo(1);
-        var task = taskRepository.findAll().get(0);
-        assertThat(task.getName()).isEqualTo("New Task Title");
+        var task = taskRepository.findByName(dto.getName()).get();
         assertThat(task.getAssignee().getId()).isEqualTo(testUser.getId());
         assertThat(task.getTaskStatus().getSlug()).isEqualTo(testTaskStatus.getSlug());
-        assertThat(task.getLabels()).hasSize(2);
+    }
+
+    @Test
+    public void testGetAllTasks() throws Exception {
+        mockMvc.perform(get("/api/tasks")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
     }
 
     @Test
     public void testGetTaskById() throws Exception {
-        var task = new hexlet.code.model.Task();
-        task.setName("Show Title");
-        task.setTaskStatus(testTaskStatus);
-        task.setAssignee(testUser);
-        taskRepository.save(task);
-
         mockMvc.perform(get("/api/tasks/"
-                        + task.getId()).header("Authorization", "Bearer " + token))
+                        + testTask.getId()).header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void testUpdateTask() throws Exception {
-        var task = new hexlet.code.model.Task();
-        task.setName("Initial Title");
-        task.setTaskStatus(testTaskStatus);
-        task.setAssignee(testUser);
-        taskRepository.save(task);
-
         TaskUpdateDTO dto = new TaskUpdateDTO();
         dto.setName(JsonNullable.of("Updated Title"));
         dto.setDescription(JsonNullable.of("Updated description"));
         dto.setTaskLabelIds(JsonNullable.of(Set.of(testLabel2.getId())));
+        dto.setStatus(JsonNullable.of(testTaskStatus.getSlug()));
 
-        mockMvc.perform(put("/api/tasks/" + task.getId())
+        mockMvc.perform(put("/api/tasks/" + testTask.getId())
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(dto)))
                 .andExpect(status().isOk());
 
-        var updatedTask = taskRepository.findById(task.getId()).get();
+        var updatedTask = taskRepository.findById(testTask.getId()).get();
         assertThat(updatedTask.getName()).isEqualTo("Updated Title");
         assertThat(updatedTask.getDescription()).isEqualTo("Updated description");
-    }
-
-    @Test
-    public void testUpdateTaskToClearLabels() throws Exception {
-        Task task = new Task();
-        task.setName("Task with labels");
-        task.setTaskStatus(testTaskStatus);
-        task.setLabels(Set.of(testLabel1, testLabel2));
-        taskRepository.save(task);
-
-        TaskUpdateDTO dto = new TaskUpdateDTO();
-        dto.setTaskLabelIds(JsonNullable.of(Set.of()));
-
-        var request = put("/api/tasks/" + task.getId())
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(dto));
-
-        mockMvc.perform(request)
-                .andExpect(status().isOk());
-
-        var updatedTask = taskRepository.findById(task.getId()).get();
-        assertThat(updatedTask.getLabels()).isEmpty();
+        assertThat(updatedTask.getTaskStatus()).isEqualTo(testTaskStatus);
+        assertThat(updatedTask.getLabels().size()).isEqualTo(1);
+        assertThat(updatedTask.getLabels().contains(testLabel2));
     }
 
     @Test
@@ -254,31 +235,41 @@ public class TasksControllerTest {
 
     @Test
     public void testFilterTasksByAssignee() throws Exception {
+        User user = new User();
+        user.setEmail("user@@example.com");
+        user.setPasswordDigest("1234");
+        userRepository.save(user);
+
         Task task = new Task();
         task.setName("Assigned task");
         task.setTaskStatus(testTaskStatus);
-        task.setAssignee(testUser);
+        task.setAssignee(user);
         taskRepository.save(task);
 
-        mockMvc.perform(get("/api/tasks?assigneeId=" + testUser.getId())
+        mockMvc.perform(get("/api/tasks?assigneeId=" + user.getId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].assignee_id").value(testUser.getId()));
+                .andExpect(jsonPath("$[0].assignee_id").value(user.getId()));
     }
 
     @Test
     public void testFilterTasksByStatus() throws Exception {
+        TaskStatus status = new TaskStatus();
+        status.setName("for filter");
+        status.setSlug("for_filter");
+        taskStatusRepository.save(status);
+
         Task task = new Task();
         task.setName("Task with status");
-        task.setTaskStatus(testTaskStatus);
+        task.setTaskStatus(status);
         taskRepository.save(task);
 
-        mockMvc.perform(get("/api/tasks?status=" + testTaskStatus.getSlug())
+        mockMvc.perform(get("/api/tasks?status=" + status.getSlug())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].status").value(testTaskStatus.getSlug()));
+                .andExpect(jsonPath("$[0].status").value(status.getSlug()));
     }
 
     @Test

@@ -25,6 +25,7 @@ public class TaskCreateDTO {
     @JsonProperty("content")
     private String description;
 
+    @NotNull(message = "Status cannot be null.")
     @NotBlank(message = "Status cannot be empty.")
     private String status;
 

@@ -5,7 +5,11 @@ import hexlet.code.config.JWTUtils;
 import hexlet.code.dto.UserCreateDTO;
 import hexlet.code.dto.UserUpdateDTO;
 import hexlet.code.mapper.UserMapper;
+import hexlet.code.model.Task;
+import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.TaskRepository;
+import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.service.UserService;
 import org.junit.jupiter.api.AfterEach;
@@ -41,6 +45,10 @@ public class UsersControllerTest {
     @Autowired
     private UserMapper userMapper;
     @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private TaskStatusRepository taskStatusRepository;
+    @Autowired
     private ObjectMapper om;
     @Autowired
     private JWTUtils jwtUtils;
@@ -52,6 +60,7 @@ public class UsersControllerTest {
     private User testUser;
     private User user2;
     private User admin;
+    private TaskStatus testTaskStatus;
 
     @BeforeEach
     public void setUp() {
@@ -75,10 +84,17 @@ public class UsersControllerTest {
         admin.setAdmin(true);
         userRepository.save(admin);
         adminToken = jwtUtils.generateToken(admin.getEmail());
+
+        testTaskStatus = new TaskStatus();
+        testTaskStatus.setName("test slug");
+        testTaskStatus.setSlug("test_slug");
+        taskStatusRepository.save(testTaskStatus);
     }
 
     @AfterEach
     public void cleanUp() {
+        taskRepository.deleteAll();
+        taskStatusRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -145,6 +161,21 @@ public class UsersControllerTest {
     }
 
     @Test
+    public void testUpdateUserWithPassword() throws Exception {
+        UserUpdateDTO dto = new UserUpdateDTO();
+        dto.setPassword(JsonNullable.of("updatedPassword"));
+
+        mockMvc.perform(put("/api/users/" + testUser.getId())
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(dto)))
+                .andExpect(status().isOk());
+
+        User updatedUser = userRepository.findById(testUser.getId()).get();
+        assertThat(passwordEncoder.matches("updatedPassword", updatedUser.getPasswordDigest())).isTrue();
+    }
+
+    @Test
     public void testDeleteUser() throws Exception {
         mockMvc.perform(delete("/api/users/" + testUser.getId())
                         .header("Authorization", "Bearer " + token))
@@ -192,6 +223,21 @@ public class UsersControllerTest {
         mockMvc.perform(delete("/api/users/" + user2.getId())
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteStatusFailsIfAssociatedWithTask() throws Exception {
+        Task testTask = new Task();
+        testTask.setAssignee(testUser);
+        testTask.setTaskStatus(testTaskStatus);
+        testTask.setName("Title");
+        taskRepository.save(testTask);
+
+        mockMvc.perform(delete("/api/users/" + testUser.getId())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
+
+        assertThat(userRepository.findById(testUser.getId())).isPresent();
     }
 
     @Test
