@@ -52,6 +52,7 @@ public class User implements UserDetails, BaseEntity {
     @OneToMany(mappedBy = "assignee")
     private List<Task> tasks;
 
+    @Column(name = "is_admin")
     private boolean isAdmin = false;
 
     @CreatedDate
@@ -95,4 +96,3 @@ public class User implements UserDetails, BaseEntity {
         return true;
     }
 }
-
