@@ -60,7 +60,7 @@ public class TaskStatusesControllerTest {
 
         testTaskStatus = new TaskStatus();
         testTaskStatus.setName("In Progress");
-        testTaskStatus.setSlug("in-progress");
+        testTaskStatus.setSlug("in_progress");
         taskStatusRepository.save(testTaskStatus);
     }
 
