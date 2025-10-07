@@ -32,12 +32,6 @@ public class TaskStatusService {
     private PasswordEncoder passwordEncoder;
 
     public TaskStatusDTO create(TaskStatusCreateDTO taskStatusData) {
-        if (taskStatusRepository.findBySlug(taskStatusData.getSlug()).isPresent()) {
-            System.out.println("Task status with this slug already exists");
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Task status with this slug already exists");
-        }
-
         var taskStatus = taskStatusMapper.map(taskStatusData);
         return taskStatusMapper.map(taskStatusRepository.save(taskStatus));
     }
