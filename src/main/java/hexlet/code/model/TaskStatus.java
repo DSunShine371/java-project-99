@@ -7,9 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -35,15 +32,10 @@ public class TaskStatus implements BaseEntity {
 
     @Column(unique = true)
     @ToString.Include
-    @NotBlank(message = "Name cannot be empty.")
-    @Size(min = 1, message = "Name must contain at least 1 character.")
     private String name;
 
     @Column(unique = true)
     @ToString.Include
-    @NotBlank(message = "Slug cannot be empty.")
-    @Size(min = 1, message = "Slug must contain at least 1 character.")
-    @Pattern(regexp = "^[a-z0-9_]+$", message = "Slug must consist of lowercase letters, numbers, and hyphens only.")
     private String slug;
 
     @OneToMany(mappedBy = "taskStatus")
