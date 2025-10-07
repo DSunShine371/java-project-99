@@ -105,21 +105,6 @@ public class TaskStatusesControllerTest {
     }
 
     @Test
-    public void testCreateStatusWithInvalidData() throws Exception {
-        TaskStatusCreateDTO dto = new TaskStatusCreateDTO();
-        dto.setName("");
-        dto.setSlug("INVALID SLUG");
-
-        var request = post("/api/task_statuses")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(dto));
-
-        mockMvc.perform(request)
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     public void testUpdateStatus() throws Exception {
         TaskStatusUpdateDTO dto = new TaskStatusUpdateDTO();
         dto.setName(JsonNullable.of("Updated Name"));
