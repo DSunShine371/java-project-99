@@ -8,7 +8,6 @@ import hexlet.code.mapper.LabelMapper;
 import hexlet.code.model.Label;
 import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,14 +18,20 @@ import java.util.List;
 @Transactional
 public class LabelService {
 
-    @Autowired
-    private LabelRepository labelRepository;
+    private final LabelRepository labelRepository;
 
-    @Autowired
-    private TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-    @Autowired
-    private LabelMapper labelMapper;
+    private final LabelMapper labelMapper;
+
+    public LabelService(
+            LabelRepository labelRepository,
+            TaskRepository taskRepository,
+            LabelMapper labelMapper) {
+        this.labelRepository = labelRepository;
+        this.taskRepository = taskRepository;
+        this.labelMapper = labelMapper;
+    }
 
     public List<LabelDTO> findAll() {
         return labelRepository.findAll().stream()

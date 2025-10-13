@@ -25,7 +25,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Task implements BaseEntity {
+public class Task {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)

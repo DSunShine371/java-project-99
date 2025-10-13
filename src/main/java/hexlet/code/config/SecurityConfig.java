@@ -1,7 +1,6 @@
 package hexlet.code.config;
 
 import hexlet.code.service.SecurityUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,14 +23,21 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
-    @Autowired
-    private JwtDecoder jwtDecoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final JwtDecoder jwtDecoder;
 
-    @Autowired
-    private SecurityUserDetailsService userService;
+    private final PasswordEncoder passwordEncoder;
+
+    private final SecurityUserDetailsService userService;
+
+    public SecurityConfig(
+            JwtDecoder jwtDecoder,
+            PasswordEncoder passwordEncoder,
+            SecurityUserDetailsService securityUserDetailsService) {
+        this.jwtDecoder = jwtDecoder;
+        this.passwordEncoder = passwordEncoder;
+        this.userService = securityUserDetailsService;
+    }
 
     @SuppressWarnings("java:S4502")
     @Bean

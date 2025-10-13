@@ -14,7 +14,6 @@ import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -24,20 +23,28 @@ import java.util.Set;
 @Service
 public class TaskService {
 
-    @Autowired
-    private TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private TaskStatusRepository taskStatusRepository;
+    private final TaskStatusRepository taskStatusRepository;
 
-    @Autowired
-    private LabelRepository labelRepository;
+    private final LabelRepository labelRepository;
 
-    @Autowired
-    private TaskMapper taskMapper;
+    private final TaskMapper taskMapper;
+
+    public TaskService(
+            TaskRepository taskRepository,
+            UserRepository userRepository,
+            TaskStatusRepository taskStatusRepository,
+            LabelRepository labelRepository,
+            TaskMapper taskMapper) {
+        this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
+        this.taskStatusRepository = taskStatusRepository;
+        this.labelRepository = labelRepository;
+        this.taskMapper = taskMapper;
+    }
 
     public List<TaskDTO> findAll() {
         return taskRepository.findAll().stream()

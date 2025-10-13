@@ -8,26 +8,28 @@ import hexlet.code.mapper.TaskStatusMapper;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class TaskStatusService {
-    @Autowired
-    private TaskStatusRepository taskStatusRepository;
 
-    @Autowired
-    private TaskRepository taskRepository;
+    private final TaskStatusRepository taskStatusRepository;
 
-    @Autowired
-    private TaskStatusMapper taskStatusMapper;
+    private final TaskRepository taskRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final TaskStatusMapper taskStatusMapper;
+
+    public TaskStatusService(
+            TaskStatusRepository taskStatusRepository,
+            TaskRepository taskRepository,
+            TaskStatusMapper taskStatusMapper) {
+        this.taskStatusRepository = taskStatusRepository;
+        this.taskRepository = taskRepository;
+        this.taskStatusMapper = taskStatusMapper;
+    }
 
     public TaskStatusDTO create(TaskStatusCreateDTO taskStatusData) {
         var taskStatus = taskStatusMapper.map(taskStatusData);

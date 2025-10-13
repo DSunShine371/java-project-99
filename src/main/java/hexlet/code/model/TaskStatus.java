@@ -23,7 +23,8 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class TaskStatus implements BaseEntity {
+public class TaskStatus {
+
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @ToString.Include

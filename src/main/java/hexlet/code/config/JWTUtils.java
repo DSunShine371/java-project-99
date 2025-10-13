@@ -1,6 +1,5 @@
 package hexlet.code.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -12,8 +11,11 @@ import java.time.temporal.ChronoUnit;
 @Component
 public class JWTUtils {
 
-    @Autowired
-    private JwtEncoder encoder;
+    private final JwtEncoder encoder;
+
+    public JWTUtils(JwtEncoder jwtEncoder) {
+        this.encoder = jwtEncoder;
+    }
 
     public String generateToken(String username) {
         Instant now = Instant.now();

@@ -2,7 +2,6 @@ package hexlet.code.controller.api;
 
 import hexlet.code.config.JWTUtils;
 import hexlet.code.dto.AuthRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,11 +15,17 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api")
 public class AuthenticationController {
-    @Autowired
-    private JWTUtils jwtUtils;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final JWTUtils jwtUtils;
+
+    private final AuthenticationManager authenticationManager;
+
+    public AuthenticationController(
+            JWTUtils jwtUtils,
+            AuthenticationManager authenticationManager) {
+        this.jwtUtils = jwtUtils;
+        this.authenticationManager = authenticationManager;
+    }
 
     @PostMapping("/login")
     public String create(@RequestBody AuthRequest authRequest) {

@@ -2,15 +2,18 @@ package hexlet.code.utils;
 
 import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserUtils {
-    @Autowired
-    private UserRepository userRepository;
+
+    private final UserRepository userRepository;
+
+    public UserUtils(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     public User getCurrentUser() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
